@@ -80,11 +80,11 @@ namespace UCCX_API
                     string sheetQueue = String.Empty;
                     for (int j = 1; j <= colCount; j++)
                     {
-                        if (j == 1 && worksheet.Cells[i, j].Value.ToString() != null)
+                        if (j == 1 && worksheet.Cells[i, j].Value != null)
                         {
                             sheetName = worksheet.Cells[i, j].Value.ToString();
                         }
-                        else if (j == 2 & worksheet.Cells[i, j] != null && worksheet.Cells[i, j].Value.ToString() != null)
+                        else if (j == 2 & worksheet.Cells[i, j] != null && worksheet.Cells[i, j].Value != null)
                         {
                             sheetQueue = worksheet.Cells[i, j].Value.ToString();
                         }

@@ -140,7 +140,7 @@ namespace UCCX_API
         private void SetLogPath()
         {
             UpdateConsoleStep("Initializing Log File...");
-            LogPath = ConfigurationEnv.GetSection("Logging").Value + "WFM_UpdateQueue_" + System.DateTime.Now.ToString("MMddyyyy_hh-mm-ss") + ".txt";
+            LogPath = ConfigurationEnv.GetSection("Logging").Value + "WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH00") + ".txt";
         }
         public void BeginLog()
         {

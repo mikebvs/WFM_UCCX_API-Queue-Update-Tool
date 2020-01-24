@@ -14,8 +14,16 @@ namespace UCCX_API
         {
             //Determine First Name, Last Name and Queue name
             agentName = sheetName;
-            FirstName = sheetName.Substring(0, sheetName.IndexOf(" "));
-            LastName = sheetName.Substring(sheetName.IndexOf(FirstName) + 1);
+            if (agentName.Contains(" "))
+            {
+                FirstName = sheetName.Substring(0, sheetName.IndexOf(" "));
+                LastName = sheetName.Substring(sheetName.IndexOf(FirstName) + 1);
+            }
+            else
+            {
+                FirstName = agentName;
+                LastName = "";
+            }
             Queue = sheetQueue;
         }
         public void Info()

@@ -15,31 +15,27 @@ namespace UCCX_API
     {
         static void Main(string[] args)
         {
+            // Core data is stored within APIHandler
             APIHandler apiHandler = new APIHandler();
+            // Creates CredentialManager and APIData objects
+                // Credential Manager reads config Parameters based on Environment
+                // APIData uses Environment Data to determine where to populate API Data Resources and Skill
             apiHandler.Init();
-            //Pulls information from Environment locked config files
-            //apiHandler.cm = new CredentialManager();
-            //Pulls all resource/skill data from API
-            //apiHandler.apiData = new APIData(apiHandler.cm);
-            //// DEBUG -- lines below print output for verification #################################################
-            //apiHandler.Info();
-            ////#####################################################################################################
 
-
-
-            //// DEBUG -- lines below print output for verification #################################################
-            //// Example of Request to get a single Agent
-            //Agent agent = ApiWebRequestHelper.GetXmlRequest<Agent>(apiHandler.cm.RootURL + "/resource/whi01022", apiHandler.cm.Username, apiHandler.cm.Password);
-            //agent.Info();
-            ////#####################################################################################################
-
+            // ExcelData is comprised of the updated info pulled from WFM Excel Sheet
+                // Reads Agents and their desired Queue
+                // Reads Queues and the required skills to be added to the Queue
             ExcelData excelData = new ExcelData(apiHandler.cm);
-            //// DEBUG -- Prints ExcelSkill and ExcelAgent Data for verification ####################################
-            //excelData.Info();
-            ////#####################################################################################################
 
             // Takes in ExcelData Object to determine skills required to update each user via API PUT Request
             apiHandler.ExcelQueueUpdate(excelData);
+
+            // Clearly defines console output end
+            for (int i = 0; i < Console.WindowWidth; ++i)
+            {
+                Console.Write("-");
+            }
+            Console.WriteLine("\n");
 
         }
     }
