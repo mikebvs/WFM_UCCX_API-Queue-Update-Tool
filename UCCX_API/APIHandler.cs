@@ -56,7 +56,9 @@ namespace UCCX_API
                     Resource agentInfo = apiData.ResourcesData.Resource.Where(p => p.FirstName + " " + p.LastName == excelAgent.agentName).First();
                     // Serialize XML related to the current excelAgent being processed using Resource Object
                     XmlDocument xml = SerializeXml(agentInfo);
-                    
+
+                    //Console.WriteLine(xml.OuterXml);
+                    //Console.ReadKey();
                     // Isolate Old skillMap Node
                     XmlNode node = xml.SelectSingleNode("/resource/skillMap");
 
@@ -121,17 +123,33 @@ namespace UCCX_API
             EndConsoleLog(excelData.excelAgents.Count, numFailed);
             cm.EndLog();
         }
-        public XmlDocument SerializeXml<T>(T serializeObject)
+        public XmlDocument SerializeXml<T>(T serializeObject, bool stripNamespace = true)
         {
             string xmlString = "";
-            System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(serializeObject.GetType());
-            //x.Serialize(Console.Out, agent);
+            
+            // Create our own namespaces for the output
+            System.Xml.Serialization.XmlSerializerNamespaces namespaces = new System.Xml.Serialization.XmlSerializerNamespaces();
+
+            //Add an empty namespace and empty value
+            namespaces.Add("", "");
+
+            //System.Xml.Serialization.XmlSerializer x = new System.Xml.Serialization.XmlSerializer(serializeObject.GetType());
             using (StringWriter textWriter = new StringWriter())
             {
-                x.Serialize(textWriter, serializeObject);
+                using (XmlWriter writer = XmlWriter.Create(textWriter, new XmlWriterSettings { OmitXmlDeclaration = true }))
+                {
+                    if (stripNamespace == true)
+                    {
+                        new System.Xml.Serialization.XmlSerializer(serializeObject.GetType()).Serialize(writer, serializeObject, namespaces);
+                    }
+                    else
+                    {
+                        new System.Xml.Serialization.XmlSerializer(serializeObject.GetType()).Serialize(writer, serializeObject);
+                    }
+                }
                 xmlString = textWriter.ToString();
             }
-            //Console.WriteLine(xmlString);
+            
             XmlDocument xml = new XmlDocument();
             xml.LoadXml(xmlString);
             return xml;

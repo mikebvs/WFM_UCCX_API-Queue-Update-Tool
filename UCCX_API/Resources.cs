@@ -105,6 +105,12 @@ namespace UCCX_API
     {
         [XmlElement(ElementName = "resource")]
         public List<Resource> Resource { get; set; }
+        [XmlNamespaceDeclarations]
+        public XmlSerializerNamespaces Namespaces
+        {
+            get { return this._namespaces; }
+        }
+        private XmlSerializerNamespaces _namespaces;
     }
 
 }
