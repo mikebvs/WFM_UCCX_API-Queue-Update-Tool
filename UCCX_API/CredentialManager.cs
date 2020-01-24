@@ -164,17 +164,9 @@ namespace UCCX_API
                 w.WriteLine("----------------------------------------------------------------------------------------------");
             }
         }
-        public void Info()
+        public new void Info()
         {
             Console.WriteLine("ENV: {0}\nROOT URL: {1}\nEXCEL FILE: {2}\nUSERNAME: {3}\nPASSWORD: {4}", Env, RootURL, ExcelFile, Username, Password.Substring(0, 10));
         }
-        //public void UpdateConsoleStep(string message)
-        //{
-        //    int currentLineCursor = Console.CursorTop;
-        //    Console.SetCursorPosition(0, Console.CursorTop);
-        //    Console.Write(new string(' ', Console.WindowWidth));
-        //    Console.SetCursorPosition(0, currentLineCursor);
-        //    Console.Write(message);
-        //}
     }
 }

@@ -17,7 +17,7 @@ namespace UCCX_API
             UpdateConsoleStep("Fetching Skill Data from UCCX API...");
             SkillsData = ApiWebRequestHelper.GetXmlRequest<Skills>(cm.RootURL + "/skill", cm.Username, cm.Password);
         }
-        public void Info()
+        public new void Info()
         {
             Console.WriteLine("\n\n###################################################################");
             Console.WriteLine("########################## RESOURCE DATA ##########################");
