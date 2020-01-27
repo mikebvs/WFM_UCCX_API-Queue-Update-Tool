@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq;
 using System.Net;
 using System.Xml;
+using System.Diagnostics;
 
 namespace UCCX_API
 {
@@ -25,8 +26,9 @@ namespace UCCX_API
             this.apiData = new APIData(this.cm);
         }
         // Method used to update agent queues based on the results of the Excel File built by WFM
-        public void ExcelQueueUpdate(ExcelData excelData)
+        public void ExcelQueueUpdate(ExcelData excelData, bool wipeData = false)
         {
+            long totalTime = 0;
             UpdateConsoleStep("WFM Agent Queue Update Process using the UCCX API...");
             // Variables to track for logging/reporting
             int numFailed = 0;
@@ -41,6 +43,8 @@ namespace UCCX_API
             // Begin iterating through each agent to build and update skillmaps
             foreach(ExcelAgent excelAgent in excelData.excelAgents)
             {
+                Stopwatch isw = new Stopwatch();
+                isw.Start();
                 // Determine Agent URL via apiData.ResourcesData
                 string agentUserId = apiData.ResourcesData.Resource.Where(p => p.FirstName + " " + p.LastName == excelAgent.agentName).First().UserID;
                 string agentUrl = $"{cm.RootURL}/resource/{agentUserId}";
@@ -48,7 +52,6 @@ namespace UCCX_API
                 //// DEBUG -- Prints the built Agent URL for verification ###############################################
                 //Console.WriteLine(agentUrl);
                 ////#####################################################################################################
-
                 try
                 {
 
@@ -64,11 +67,13 @@ namespace UCCX_API
 
                     // Determine Agent's desired Queue
                     ExcelSkill newQueue = excelData.excelSkills.Where(p => p.Name == excelAgent.Queue).First();
-                    
+
                     // Build Skill Map XML to replace current using Agent's desired Queue
                     XmlDocument xmlSkillMap = new XmlDocument();
                     string skillMapString = BuildSkillMap(newQueue);
-                    if(skillMapString != "ERROR")
+
+                    // BuildSkillMap() Returns "ERROR" if the skill was unable to be found
+                    if (skillMapString != "ERROR")
                     {
                         xmlSkillMap.LoadXml(skillMapString);
 
@@ -78,11 +83,17 @@ namespace UCCX_API
                         //Console.WriteLine("########################### NEW SKILL MAP ###########################\n" + node.OuterXml + "\n\n");
                         ////#####################################################################################################
 
-                        // Replace skillMap Node with new skillMap Node
-                        node.InnerXml = newNode.InnerXml;
-                        //// DEBUG -- Removes all skillMap InnerXml Nodes, comment in to reset user skillMaps for testing #######
-                        //node.InnerXml = "";
-                        ////#####################################################################################################
+                        // If wipeData == True, remove all skills from Agents
+                        if (wipeData != true)
+                        {
+                            // Replace skillMap Node with new skillMap Node
+                            node.InnerXml = newNode.InnerXml;
+                        }
+                        else
+                        {
+                            // Remove all skills from Agents
+                            node.InnerXml = "";
+                        }
                         try
                         {
                             // Call Method to make PUT Request to API to update Agent skillMap and Log Action/Results
@@ -107,10 +118,13 @@ namespace UCCX_API
                     }
                     numAgentsProcessed += 1;
 
+                    isw.Stop();
+                    totalTime += isw.ElapsedMilliseconds;
                     // End Process Console Output
-                    UpdateConsoleStep("\t>Agents Processed: " + numAgentsProcessed.ToString() + "/" + excelData.excelAgents.Count.ToString());
+                    UpdateConsoleStep($"\t>Agents Processed: {numAgentsProcessed.ToString()}/{excelData.excelAgents.Count.ToString()} ({isw.ElapsedMilliseconds.ToString()}ms, {totalTime.ToString()}ms Total)");
                     LogConsoleAndLogFile($"\t>Successfully updated: {(numAgentsProcessed - numFailed).ToString()}.", 1, false, false);
                     LogConsoleAndLogFile($"\t>Failed to Update: {numFailed.ToString()}.", 2, false, false);
+                    cm.LogMessage($"Time Elapsed: {isw.ElapsedMilliseconds.ToString()}ms, Total Time Elapsed: {totalTime.ToString()}ms");
                 }
                 catch(Exception e)
                 {
@@ -120,7 +134,7 @@ namespace UCCX_API
             }
             cm.EndLog();
             cm.BeginLog();
-            EndConsoleLog(excelData.excelAgents.Count, numFailed);
+            EndConsoleLog(excelData.excelAgents.Count, numFailed, totalTime);
             cm.EndLog();
         }
         public XmlDocument SerializeXml<T>(T serializeObject, bool stripNamespace = true)
@@ -194,7 +208,7 @@ namespace UCCX_API
             {
                 if(skillsReport.Length > 3)
                 {
-                    skillsReport = skillsReport.Substring(0, skillsReport.Length - 3);
+                    skillsReport = skillsReport.Substring(0, skillsReport.Length - 2);
                 }
                 else
                 {
@@ -280,7 +294,7 @@ namespace UCCX_API
                 Console.ReadKey();
             }
         }
-        public void EndConsoleLog(int totalAgents, int numFailed)
+        public void EndConsoleLog(int totalAgents, int numFailed, long timeElapsed)
         {
             // Console Reporting Formatting
             UpdateConsoleStep("");
@@ -290,7 +304,7 @@ namespace UCCX_API
             Console.SetCursorPosition(0, Console.CursorTop);
             UpdateConsoleStep("Process Finished...");
             Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop + 1);
-            UpdateConsoleStep($"\t>Attempted to update {totalAgents.ToString()} Agents.\n\n");
+            UpdateConsoleStep($"\t>Attempted to update {totalAgents.ToString()} Agents ({timeElapsed.ToString()}).\n\n");
             Console.SetCursorPosition(0, Console.CursorTop + 1);
             // Logging to Log File
             cm.LogMessage($"Finished WFM Agent Queue Update Process using the UCCX API.");
@@ -298,11 +312,11 @@ namespace UCCX_API
             {
                 cm.LogMessage($">Attempted to update {totalAgents.ToString()} Agents.");
                 cm.LogMessage($">WARNING: {numFailed.ToString()}/{totalAgents.ToString()} Agents failed to update.");
-                cm.LogMessage($">{(totalAgents - numFailed).ToString()}/{totalAgents.ToString()} Agents successfully updated.");
+                cm.LogMessage($">{(totalAgents - numFailed).ToString()}/{totalAgents.ToString()} Agents successfully updated ({timeElapsed.ToString()}).");
             }
             else
             {
-                cm.LogMessage($">{totalAgents.ToString()} Agents successfully updated.");
+                cm.LogMessage($">{totalAgents.ToString()} Agents successfully updated ({timeElapsed.ToString()}).");
             }
         }
     }

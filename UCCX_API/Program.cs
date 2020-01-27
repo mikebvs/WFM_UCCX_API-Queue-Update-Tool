@@ -29,6 +29,8 @@ namespace UCCX_API
 
             // Takes in ExcelData Object to determine skills required to update each user via API PUT Request
             apiHandler.ExcelQueueUpdate(excelData);
+            // This override is used to remove all skills from the Agents in the Excel Sheet
+            //apiHandler.ExcelQueueUpdate(excelData, true);
 
             // Clearly defines console output end
             for (int i = 0; i < Console.WindowWidth; ++i)
