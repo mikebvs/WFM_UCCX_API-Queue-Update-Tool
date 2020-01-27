@@ -25,6 +25,8 @@ namespace UCCX_API
             SetLogPath();
             using (StreamWriter w = File.AppendText(LogPath))
             {
+                w.WriteLine("");
+                w.WriteLine("");
                 string initLine = "#### Logging Initiated -- " + System.DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss") + " ####";
                 int len = initLine.Length;
                 string borders = "";
@@ -140,7 +142,14 @@ namespace UCCX_API
         private void SetLogPath()
         {
             UpdateConsoleStep("Initializing Log File...");
-            LogPath = ConfigurationEnv.GetSection("Logging").Value + "WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH00") + ".txt";
+            if(System.DateTime.Now.Minute > 30)
+            {
+                LogPath = ConfigurationEnv.GetSection("Logging").Value + "WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH30") + ".txt";
+            }
+            else
+            {
+                LogPath = ConfigurationEnv.GetSection("Logging").Value + "WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH00") + ".txt";
+            }
         }
         public void BeginLog()
         {

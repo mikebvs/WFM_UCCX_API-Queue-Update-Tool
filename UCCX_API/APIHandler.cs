@@ -17,7 +17,7 @@ namespace UCCX_API
         {
             //Creates Console Banner
             Console.WriteLine("########################################################################################");
-            Console.WriteLine("###################### WORKFORCE MANAGEMENT QUEUE UPDATE API TOOL ######################");
+            Console.WriteLine("#################### WORKFORCE MANAGEMENT QUEUE UPDATE UCCX API TOOL ###################");
             Console.WriteLine("########################################################################################\n\n");
             UpdateConsoleStep("Entering Init State...");
             // Credential Manager stores Config Parameters, includes API Auth Credentials, API Root URL depending on Environment, and Logging paths
@@ -84,7 +84,7 @@ namespace UCCX_API
                         ////#####################################################################################################
 
                         // If wipeData == True, remove all skills from Agents
-                        if (wipeData != true)
+                        if (wipeData == false)
                         {
                             // Replace skillMap Node with new skillMap Node
                             node.InnerXml = newNode.InnerXml;
@@ -132,8 +132,9 @@ namespace UCCX_API
                 }
                 cm.LogMessage("");
             }
-            cm.EndLog();
-            cm.BeginLog();
+            cm.LogMessage("");
+            cm.LogMessage("");
+            cm.LogMessage("-------------- END OF PROCESS REPORT --------------");
             EndConsoleLog(excelData.excelAgents.Count, numFailed, totalTime);
             cm.EndLog();
         }
@@ -304,19 +305,19 @@ namespace UCCX_API
             Console.SetCursorPosition(0, Console.CursorTop);
             UpdateConsoleStep("Process Finished...");
             Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop + 1);
-            UpdateConsoleStep($"\t>Attempted to update {totalAgents.ToString()} Agents ({timeElapsed.ToString()}).\n\n");
+            UpdateConsoleStep($"\t>Attempted to update {totalAgents.ToString()} Agents ({timeElapsed.ToString()}ms).\n\n");
             Console.SetCursorPosition(0, Console.CursorTop + 1);
             // Logging to Log File
             cm.LogMessage($"Finished WFM Agent Queue Update Process using the UCCX API.");
             if (numFailed > 0)
             {
-                cm.LogMessage($">Attempted to update {totalAgents.ToString()} Agents.");
+                cm.LogMessage($">Attempted to update {totalAgents.ToString()} Agents ({timeElapsed.ToString()}ms).");
                 cm.LogMessage($">WARNING: {numFailed.ToString()}/{totalAgents.ToString()} Agents failed to update.");
-                cm.LogMessage($">{(totalAgents - numFailed).ToString()}/{totalAgents.ToString()} Agents successfully updated ({timeElapsed.ToString()}).");
+                cm.LogMessage($">{(totalAgents - numFailed).ToString()}/{totalAgents.ToString()} Agents successfully updated.");
             }
             else
             {
-                cm.LogMessage($">{totalAgents.ToString()} Agents successfully updated ({timeElapsed.ToString()}).");
+                cm.LogMessage($">{totalAgents.ToString()} Agents successfully updated ({timeElapsed.ToString()}ms).");
             }
         }
     }
