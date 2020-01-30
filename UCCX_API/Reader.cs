@@ -32,6 +32,8 @@ namespace UCCX_API
                     string name = String.Empty;
                     string add = String.Empty;
                     string remove = String.Empty;
+                    string skillTeam = String.Empty;
+                    string skillResource = String.Empty;
                     for (int j = 1; j <= colCount; j++)
                     {
                         if (j == 1 && worksheet.Cells[i, j].Value != null)
@@ -46,6 +48,14 @@ namespace UCCX_API
                         {
                             remove = worksheet.Cells[i, j].Value.ToString();
                         }
+                        else if (j == 4 && worksheet.Cells[i, j].Value != null)
+                        {
+                            skillResource = worksheet.Cells[i, j].Value.ToString();
+                        }
+                        else if (j == 5 && worksheet.Cells[i, j].Value != null)
+                        {
+                            skillTeam = worksheet.Cells[i, j].Value.ToString();
+                        }
                         else if (add == String.Empty || add == null)
                         {
                             continue;
@@ -56,6 +66,14 @@ namespace UCCX_API
                         //Console.WriteLine("Adding " + name);
                         ExcelSkill skill = new ExcelSkill(name, add, remove);
                         skillData.Add(skill);
+                        if(skillResource != String.Empty && skillResource != null)
+                        {
+                            skill.SkillResourceGroup = skillResource;
+                        }
+                        if(skillTeam != String.Empty && skillTeam != null)
+                        {
+                            skill.SkillTeam = skillTeam;
+                        }
                     }
                 }
             }

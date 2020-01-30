@@ -9,6 +9,8 @@ namespace UCCX_API
         public string Name { get; set; }
         public Dictionary<string, int> SkillsAdded { get; set; }
         public List<string> SkillsRemoved { get; set; }
+        public string SkillResourceGroup { get; set; }
+        public string SkillTeam { get; set; }
         public ExcelSkill(string name, string toAdd, string toRemove)
         {
             // Initialize Name
@@ -40,10 +42,21 @@ namespace UCCX_API
         public void Info()
         {
             Console.WriteLine("\n########### " + Name + " ###########");
+            if(SkillResourceGroup != null)
+            {
+                Console.WriteLine($"  >Resource Group: {SkillResourceGroup}");
+            }
+            if(SkillTeam != null)
+            {
+                Console.WriteLine($"  >Team: {SkillTeam}");
+            }
+            Console.WriteLine("\t__________________________");
+            Console.WriteLine("\t|SKILLS ADDED ------------");
             foreach (KeyValuePair<string, int> kvp in SkillsAdded)
             {
-                Console.WriteLine("\t" + kvp.Key + ": " + kvp.Value.ToString());
+                Console.WriteLine("\t|" + kvp.Key + ": " + kvp.Value.ToString());
             }
+            Console.WriteLine("\t--------------------------");
             Console.WriteLine("\n");
         }
     }

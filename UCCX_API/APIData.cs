@@ -8,6 +8,8 @@ namespace UCCX_API
     {
         public Resources ResourcesData { get; set; }
         public Skills SkillsData { get; set; }
+        public Teams teamsData { get; set; }
+        public ResourceGroups resourceGroupsData { get; set; }
         public APIData(CredentialManager cm)
         {
             // Deserialize Agent Data from API
@@ -16,6 +18,10 @@ namespace UCCX_API
             // Deserialize Skills Data from API
             UpdateConsoleStep("Fetching Skill Data from UCCX API...");
             SkillsData = ApiWebRequestHelper.GetXmlRequest<Skills>(cm.RootURL + "/skill", cm.Username, cm.Password);
+            UpdateConsoleStep("Fetching Teams Data from UCCX API...");
+            teamsData = ApiWebRequestHelper.GetXmlRequest<Teams>(cm.RootURL + "/team", cm.Username, cm.Password);
+            UpdateConsoleStep("Fetching Resource Group Data from UCCX API...");
+            resourceGroupsData = ApiWebRequestHelper.GetXmlRequest<ResourceGroups>(cm.RootURL + "/resourceGroup", cm.Username, cm.Password);
         }
         public new void Info()
         {
@@ -33,8 +39,32 @@ namespace UCCX_API
             {
                 Console.WriteLine($"[{sk.SkillId}] {sk.SkillName}\n\trefURL: {sk.Self}");
             }
+            Console.WriteLine("\n\n###################################################################");
+            Console.WriteLine("############################ TEAMS DATA ###########################");
+            Console.WriteLine("###################################################################\n");
+            foreach(ResourceGroupData rg in resourceGroupsData.ResourceGroup)
+            {
+                Console.WriteLine($"[{rg.Id}] {rg.Name} -- {rg.Self}");
+            }
+            Console.WriteLine("\n\n###################################################################");
+            Console.WriteLine("####################### RESOURCE GROUP DATA #######################");
+            Console.WriteLine("###################################################################\n");
+            foreach (TeamData td in teamsData.Team)
+            {
+                Console.WriteLine($"[{td.TeamId}] {td.Teamname} -- {td.Self}");
+                if (td.PrimarySupervisor != null)
+                {
+                    Console.WriteLine($"\tPrimary Supervisor: {td.PrimarySupervisor.Name}\n");
+                }
+                if (td.SecondarySupervisors != null)
+                {
+                    foreach (SecondrySupervisor sc in td.SecondarySupervisors.SecondrySupervisor)
+                    {
+                        Console.WriteLine($"\tSecondary Supervisor: {sc.Name.ToString()}\n");
+                    }
+                }
+            }
             Console.WriteLine("\n");
-
         }
     }
 }

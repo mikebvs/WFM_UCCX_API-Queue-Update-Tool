@@ -41,7 +41,7 @@ namespace UCCX_API
             cm.LogMessage("");
 
             // Begin iterating through each agent to build and update skillmaps
-            foreach(ExcelAgent excelAgent in excelData.excelAgents)
+            foreach (ExcelAgent excelAgent in excelData.excelAgents)
             {
                 Stopwatch isw = new Stopwatch();
                 isw.Start();
@@ -94,6 +94,16 @@ namespace UCCX_API
                             // Remove all skills from Agents
                             node.InnerXml = "";
                         }
+                        if(newQueue.SkillResourceGroup != null)
+                        {
+                            cm.LogMessage($"Updating Resource Group of {excelAgent.agentName} ({agentUserId}) to {newQueue.SkillResourceGroup}.");
+                            xml = UpdateResourceGroup(xml, newQueue);
+                        }
+                        if(newQueue.SkillTeam != null)
+                        {
+                            cm.LogMessage($"Updating Team of {excelAgent.agentName} ({agentUserId}) to {newQueue.SkillTeam}.");
+                            xml = UpdateTeam(xml, newQueue);
+                        }
                         try
                         {
                             // Call Method to make PUT Request to API to update Agent skillMap and Log Action/Results
@@ -126,7 +136,7 @@ namespace UCCX_API
                     LogConsoleAndLogFile($"\t>Failed to Update: {numFailed.ToString()}.", 2, false, false);
                     cm.LogMessage($"Time Elapsed: {isw.ElapsedMilliseconds.ToString()}ms, Total Time Elapsed: {totalTime.ToString()}ms");
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     cm.LogMessage($"Error Occurred Serializing XML Data from UCCX API: {e.Message.ToString()}");
                 }
@@ -137,6 +147,61 @@ namespace UCCX_API
             cm.LogMessage("-------------- END OF PROCESS REPORT --------------");
             EndConsoleLog(excelData.excelAgents.Count, numFailed, totalTime);
             cm.EndLog();
+        }
+        public XmlDocument UpdateTeam(XmlDocument currentDoc, ExcelSkill skill)
+        {
+            if (skill.SkillResourceGroup != null)
+            {
+                // Find Resource Group from the API that matches the ExcelSkill's SkillResourceGroup Name
+                ResourceGroupData apiRG = apiData.resourceGroupsData.ResourceGroup.Where(p => p.Name == skill.SkillResourceGroup).First();
+                // Build XML off of template
+                string resourceTemplate = "<resourceGroup name=\"<RESOURCE_NAME>\"><refURL><REF_URL></refURL></resourceGroup>";
+                resourceTemplate = resourceTemplate.Replace("<RESOURCE_NAME>", apiRG.Name).Replace("<REF_URL>", apiRG.Self);
+
+                // Create new XML Document to replace InnerXML of currentDoc with
+                XmlDocument xmlRG = new XmlDocument();
+                xmlRG.LoadXml(resourceTemplate);
+                // Isolate the Nodes we want to edit
+                XmlNode newNode = xmlRG.SelectSingleNode("/resourceGroup");
+                XmlNode oldNode = currentDoc.SelectSingleNode("/resource/resourceGroup");
+                // Replace the name attribute of the outerXml
+                oldNode.Attributes[0].Value = apiRG.Name;
+
+                // Replace the InnerXml
+                oldNode.InnerXml = newNode.InnerXml;
+                
+                
+                //Console.WriteLine(oldNode.OuterXml + "\n\nRESOURCE GROUP DONE ^^^^^^^^^ Resource Name: " + apiRG.Name);
+                //Console.WriteLine(currentDoc.OuterXml + "\n\n\n\n\n");
+            }
+            return currentDoc;
+        }
+        public XmlDocument UpdateResourceGroup(XmlDocument currentDoc, ExcelSkill skill) 
+        {
+            if(skill.SkillTeam != null)
+            {
+                // Find the Team from the API that matches the ExcelSkill's SkillTeam Name
+                TeamData apiTD = apiData.teamsData.Team.Where(p => p.Teamname == skill.SkillTeam).First();
+                // Build XML off of template
+                string teamTemplate = "<team name=\"<TEAM_NAME>\"><refURL><REF_URL></refURL></team>";
+                teamTemplate = teamTemplate.Replace("<TEAM_NAME>", apiTD.Teamname).Replace("<REF_URL>", apiTD.Self);
+
+                // Create new XML Document to replace InnerXML of currentDoc with
+                XmlDocument xmlTD = new XmlDocument();
+                xmlTD.LoadXml(teamTemplate);
+                // Isolate the Nodes we want to edit
+                XmlNode newNode = xmlTD.SelectSingleNode("/team");
+                XmlNode oldNode = currentDoc.SelectSingleNode("/resource/team");
+                // Replace the name attribute of the outerXml
+                oldNode.Attributes[0].Value = apiTD.Teamname;
+
+                // Replace the InnerXml
+                oldNode.InnerXml = newNode.InnerXml;
+
+                //Console.WriteLine(oldNode.OuterXml + "\n\nTEAM DONE ^^^^^^ Team Name: " + apiTD.Teamname + "\n\n\n\n\n");
+                //Console.WriteLine(currentDoc.OuterXml);
+            }
+            return currentDoc;
         }
         public XmlDocument SerializeXml<T>(T serializeObject, bool stripNamespace = true)
         {
