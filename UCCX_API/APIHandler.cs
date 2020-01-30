@@ -169,10 +169,6 @@ namespace UCCX_API
 
                 // Replace the InnerXml
                 oldNode.InnerXml = newNode.InnerXml;
-                
-                
-                //Console.WriteLine(oldNode.OuterXml + "\n\nRESOURCE GROUP DONE ^^^^^^^^^ Resource Name: " + apiRG.Name);
-                //Console.WriteLine(currentDoc.OuterXml + "\n\n\n\n\n");
             }
             return currentDoc;
         }
@@ -197,9 +193,6 @@ namespace UCCX_API
 
                 // Replace the InnerXml
                 oldNode.InnerXml = newNode.InnerXml;
-
-                //Console.WriteLine(oldNode.OuterXml + "\n\nTEAM DONE ^^^^^^ Team Name: " + apiTD.Teamname + "\n\n\n\n\n");
-                //Console.WriteLine(currentDoc.OuterXml);
             }
             return currentDoc;
         }
