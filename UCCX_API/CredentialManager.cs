@@ -42,7 +42,7 @@ namespace UCCX_API
             LogMessage($"Current Environment: {Env}");
             LogMessage($"Current Root URL: {RootURL}");
             LogMessage($"Using Username: {Username}");
-            LogMessage($"Using Password: {Password.Substring(0, Password.Length / 5)}");
+            LogMessage($"Using Password: {Password.Substring(0, Password.Length / 15)}**************************************");
             LogMessage($"Current Excel File: {ExcelFile}");
             EndLog();
         }

@@ -6,7 +6,7 @@ namespace UCCX_API
 {
     class ExcelData : APIHandler
     {
-        public ExcelData(CredentialManager cm)
+        public void Init(CredentialManager cm)
         {
             reader = new Reader(cm.ExcelFile);
             UpdateConsoleStep("Reading Excel Agent Data...");

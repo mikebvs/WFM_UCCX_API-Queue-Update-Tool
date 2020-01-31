@@ -22,8 +22,16 @@ namespace UCCX_API
             UpdateConsoleStep("Entering Init State...");
             // Credential Manager stores Config Parameters, includes API Auth Credentials, API Root URL depending on Environment, and Logging paths
             this.cm = new CredentialManager();
-            // APIData stores necessary information from the API such as the Agents (userID, refURL, etc) and skills (skillId, refURL, etc)
-            this.apiData = new APIData(this.cm);
+            try
+            {
+                // APIData stores necessary information from the API such as the Agents (userID, refURL, etc) and skills (skillId, refURL, etc)
+                this.apiData = new APIData(this.cm);
+            }
+            catch (Exception e)
+            {
+                cm.LogMessage($"Error Occurred during APIHandler Init Sequence: {e.Message.ToString()}");
+                cm.LogMessage($"{e.StackTrace.ToString()}");
+            }
         }
         // Method used to update agent queues based on the results of the Excel File built by WFM
         public void ExcelQueueUpdate(ExcelData excelData, bool wipeData = false)
@@ -119,6 +127,10 @@ namespace UCCX_API
                             numFailed += 1;
                             // Log Error and update Console
                             LogConsoleAndLogFile($"ERROR: {e.Message.ToString()}", 5);
+                            if (e.Message.ToString().Contains("SSL"))
+                            {
+                                throw new System.Exception("SSL Error", e);
+                            }
                         }
                     }
                     else
@@ -139,6 +151,10 @@ namespace UCCX_API
                 catch (Exception e)
                 {
                     cm.LogMessage($"Error Occurred Serializing XML Data from UCCX API: {e.Message.ToString()}");
+                    if (e.Message.ToString().Contains("SSL"))
+                    {
+                        throw new System.Exception("SSL Error", e);
+                    }
                 }
                 cm.LogMessage("");
             }
