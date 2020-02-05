@@ -38,23 +38,23 @@ namespace UCCX_API
                     {
                         if (j == 1 && worksheet.Cells[i, j].Value != null)
                         {
-                            name = worksheet.Cells[i, j].Value.ToString();
+                            name = worksheet.Cells[i, j].Value.ToString().Trim();
                         }
                         else if (j == 2 && worksheet.Cells[i, j].Value != null)
                         {
-                            add = worksheet.Cells[i, j].Value.ToString();
+                            add = worksheet.Cells[i, j].Value.ToString().Replace(" ", "").Trim();
                         }
                         else if (j == 3 && worksheet.Cells[i, j].Value != null)
                         {
-                            remove = worksheet.Cells[i, j].Value.ToString();
+                            remove = worksheet.Cells[i, j].Value.ToString().Replace(" ", "").Trim();
                         }
                         else if (j == 4 && worksheet.Cells[i, j].Value != null)
                         {
-                            skillResource = worksheet.Cells[i, j].Value.ToString();
+                            skillResource = worksheet.Cells[i, j].Value.ToString().Replace(" ", "").Trim();
                         }
                         else if (j == 5 && worksheet.Cells[i, j].Value != null)
                         {
-                            skillTeam = worksheet.Cells[i, j].Value.ToString();
+                            skillTeam = worksheet.Cells[i, j].Value.ToString().Replace(" ","").Trim();
                         }
                         else if (add == String.Empty || add == null)
                         {

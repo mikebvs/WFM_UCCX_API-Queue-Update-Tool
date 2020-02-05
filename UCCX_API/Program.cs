@@ -84,7 +84,6 @@ namespace UCCX_API
                 Console.Write("-");
             }
             Console.WriteLine("\n");
-
         }
     }
 }
