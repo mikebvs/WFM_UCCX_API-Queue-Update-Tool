@@ -1,0 +1,23 @@
+
+
+##################################################
+#### Logging Initiated -- 02/05/2020 15:24:55 ####
+##################################################
+
+Log Entry : 3:24:55 PM Wednesday, February 5, 2020
+  :Current Environment: DEV
+  :Current Root URL: 
+  :Using Username: UiAutoBotUCCX
+  :Using Password: DvvDe5**************************************
+  :Current Excel File: 
+----------------------------------------------------------------------------------------------
+
+Log Entry : 3:24:56 PM Wednesday, February 5, 2020
+  :Error occurred during ExcelData Init Sequence: Value cannot be null.
+Parameter name: fileName
+  :   at System.IO.FileInfo..ctor(String originalPath, String fullPath, String fileName, Boolean isNormalized)
+   at System.IO.FileInfo..ctor(String fileName)
+   at UCCX_API.Reader.ReadAgentData(Int32 sheetIndex) in C:\Users\van02084\source\repos\UCCX_API\UCCX_API\Reader.cs:line 85
+   at UCCX_API.ExcelData.Init(CredentialManager cm) in C:\Users\van02084\source\repos\UCCX_API\UCCX_API\ExcelData.cs:line 13
+   at UCCX_API.Program.Main(String[] args) in C:\Users\van02084\source\repos\UCCX_API\UCCX_API\Program.cs:line 37
+----------------------------------------------------------------------------------------------

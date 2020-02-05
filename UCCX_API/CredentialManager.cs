@@ -103,13 +103,13 @@ namespace UCCX_API
                     env = "DEV";
                     break;
                 case "VAVPC-ROBO-02":
-                    env = "DEV";
+                    env = "STAGE";
                     break;
                 case "VAVPC-ROBO-05":
-                    env = "DEV";
+                    env = "STAGE";
                     break;
                 case "VAVPC-ROBO-07":
-                    env = "DEV";
+                    env = "STAGE";
                     break;
                 case "VAVPC-ROBO-01":
                     env = "PROD";
@@ -142,13 +142,27 @@ namespace UCCX_API
         private void SetLogPath()
         {
             UpdateConsoleStep("Initializing Log File...");
-            if(System.DateTime.Now.Minute > 30)
+            if(Env == "PROD")
             {
-                LogPath = ConfigurationEnv.GetSection("Logging").Value + "WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH30") + ".txt";
+                if(System.DateTime.Now.Minute > 30)
+                {
+                    LogPath = ConfigurationEnv.GetSection("Logging").Value + "WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH30") + ".txt";
+                }
+                else
+                {
+                    LogPath = ConfigurationEnv.GetSection("Logging").Value + "WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH00") + ".txt";
+                }
             }
             else
             {
-                LogPath = ConfigurationEnv.GetSection("Logging").Value + "WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH00") + ".txt";
+                if (System.DateTime.Now.Minute > 30)
+                {
+                    LogPath = ConfigurationEnv.GetSection("Logging").Value + Env +  "\\WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH30") + ".txt";
+                }
+                else
+                {
+                    LogPath = ConfigurationEnv.GetSection("Logging").Value + Env + "\\WFM UCCX API [ConsoleApp] - " + System.DateTime.Now.ToString("MMddyyyy_HH00") + ".txt";
+                }
             }
         }
         public void BeginLog()
