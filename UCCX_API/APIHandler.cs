@@ -13,6 +13,7 @@ namespace UCCX_API
     {
         public APIData apiData { get; set; }
         public CredentialManager cm { get; set; }
+        public string reportingMessage { get; set; }
         public void Init()
         {
             //Creates Console Banner
@@ -51,17 +52,25 @@ namespace UCCX_API
             // Begin iterating through each agent to build and update skillmaps
             foreach (ExcelAgent excelAgent in excelData.excelAgents)
             {
-                Stopwatch isw = new Stopwatch();
-                isw.Start();
-                // Determine Agent URL via apiData.ResourcesData
-                string agentUserId = apiData.ResourcesData.Resource.Where(p => p.FirstName + " " + p.LastName == excelAgent.agentName).First().UserID;
-                string agentUrl = $"{cm.RootURL}/resource/{agentUserId}";
-                cm.LogMessage($"Updating {excelAgent.agentName}");
-                //// DEBUG -- Prints the built Agent URL for verification ###############################################
-                //Console.WriteLine(agentUrl);
-                ////#####################################################################################################
                 try
                 {
+                    Stopwatch isw = new Stopwatch();
+                    try
+                    {
+                        isw.Start();
+                    }
+                    catch (Exception n)
+                    {
+                        cm.LogMessage($"Error occurred, trying again: {n.Message.ToString()} -- {n.StackTrace.ToString()}");
+                        isw.Start();
+                    }
+                    // Determine Agent URL via apiData.ResourcesData
+                    string agentUserId = apiData.ResourcesData.Resource.Where(p => p.FirstName + " " + p.LastName == excelAgent.agentName).First().UserID;
+                    string agentUrl = $"{cm.RootURL}/resource/{agentUserId}";
+                    cm.LogMessage($"Updating {excelAgent.agentName}");
+                    //// DEBUG -- Prints the built Agent URL for verification ###############################################
+                    //Console.WriteLine(agentUrl);
+                    ////#####################################################################################################
 
                     // Determine which Resource from APIData.ResourcesData corresponds to the current excelAgent being processed
                     Resource agentInfo = apiData.ResourcesData.Resource.Where(p => p.FirstName + " " + p.LastName == excelAgent.agentName).First();
@@ -127,6 +136,7 @@ namespace UCCX_API
                             numFailed += 1;
                             // Log Error and update Console
                             LogConsoleAndLogFile($"ERROR: {e.Message.ToString()}", 5);
+                            cm.LogMessage(e.StackTrace.ToString());
                             if (e.Message.ToString().Contains("SSL"))
                             {
                                 throw new System.Exception("SSL Error", e);
@@ -140,17 +150,29 @@ namespace UCCX_API
                     }
                     numAgentsProcessed += 1;
 
+                    if (isw.IsRunning)
+                    {
                     isw.Stop();
                     totalTime += isw.ElapsedMilliseconds;
                     // End Process Console Output
-                    UpdateConsoleStep($"\t>Agents Processed: {numAgentsProcessed.ToString()}/{excelData.excelAgents.Count.ToString()} ({isw.ElapsedMilliseconds.ToString()}ms, {totalTime.ToString()}ms Total)");
-                    LogConsoleAndLogFile($"\t>Successfully updated: {(numAgentsProcessed - numFailed).ToString()}.", 1, false, false);
-                    LogConsoleAndLogFile($"\t>Failed to Update: {numFailed.ToString()}.", 2, false, false);
-                    cm.LogMessage($"Time Elapsed: {isw.ElapsedMilliseconds.ToString()}ms, Total Time Elapsed: {totalTime.ToString()}ms");
+                        UpdateConsoleStep($"\t>Agents Processed: {numAgentsProcessed.ToString()}/{excelData.excelAgents.Count.ToString()} ({isw.ElapsedMilliseconds.ToString()}ms, {totalTime.ToString()}ms Total)");
+                        LogConsoleAndLogFile($"\t>Successfully updated: {(numAgentsProcessed - numFailed).ToString()}.", 1, false, false);
+                        LogConsoleAndLogFile($"\t>Failed to Update: {numFailed.ToString()}.", 2, false, false);
+                        cm.LogMessage($"Time Elapsed: {isw.ElapsedMilliseconds.ToString()}ms, Total Time Elapsed: {totalTime.ToString()}ms");
+                    }
+                    else
+                    {
+                        totalTime += 5000;
+                        UpdateConsoleStep($"\t>Agents Processed: {numAgentsProcessed.ToString()}/{excelData.excelAgents.Count.ToString()} (N/A ms, {totalTime.ToString()}ms Total)");
+                        LogConsoleAndLogFile($"\t>Successfully updated: {(numAgentsProcessed - numFailed).ToString()}.", 1, false, false);
+                        LogConsoleAndLogFile($"\t>Failed to Update: {numFailed.ToString()}.", 2, false, false);
+                        cm.LogMessage($"Time Elapsed: N/A ms, Total Time Elapsed: {totalTime.ToString()}ms");
+                    }
                 }
                 catch (Exception e)
                 {
-                    cm.LogMessage($"Error Occurred Serializing XML Data from UCCX API: {e.Message.ToString()}");
+                    cm.LogMessage($"Error Occurred Updating Agent: {excelAgent.agentName} -- {e.Message.ToString()}");
+                    cm.LogMessage(e.StackTrace.ToString());
                     if (e.Message.ToString().Contains("SSL"))
                     {
                         throw new System.Exception("SSL Error", e);
@@ -160,9 +182,14 @@ namespace UCCX_API
             }
             cm.LogMessage("");
             cm.LogMessage("");
-            cm.LogMessage("-------------- END OF PROCESS REPORT --------------");
+            cm.LogMessage("----------------------------------- END OF PROCESS REPORT ------------------------------------");
             EndConsoleLog(excelData.excelAgents.Count, numFailed, totalTime);
             cm.EndLog();
+            reportingMessage = $"------------- WFM Queue Update has completed -------------";
+            reportingMessage += $"\n|\t>Agents Processed: {numAgentsProcessed.ToString()}/{excelData.excelAgents.Count.ToString()} (Total Elapsed Time: {totalTime.ToString()}ms)";
+            reportingMessage += $"\n|\t>Successfully updated: {(numAgentsProcessed - numFailed).ToString()}.";
+            reportingMessage += $"\n|\t>Failed to Update: {numFailed.ToString()}.";
+            reportingMessage += $"\n----------------------------------------------------------------------------------------------";
         }
         public XmlDocument UpdateTeam(XmlDocument currentDoc, ExcelSkill skill)
         {
@@ -374,7 +401,6 @@ namespace UCCX_API
             // Console Reporting Formatting
             UpdateConsoleStep("");
             Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
-            int currentLineCursor = Console.CursorTop;
             Console.Write(new string(' ', Console.WindowWidth));
             Console.SetCursorPosition(0, Console.CursorTop);
             UpdateConsoleStep("Process Finished...");

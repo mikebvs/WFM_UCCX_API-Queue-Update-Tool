@@ -14,6 +14,7 @@ namespace UCCX_API
         public IConfigurationRoot Configuration { get; set; }
         public IConfigurationRoot ConfigurationEnv { get; set; }
         public string LogPath { get; set; }
+        public string LogHeader { get; set; }
         public CredentialManager()
         {
             SetEnv();
@@ -44,6 +45,7 @@ namespace UCCX_API
             LogMessage($"Using Username: {Username}");
             LogMessage($"Using Password: {Password.Substring(0, Password.Length / 15)}**************************************");
             LogMessage($"Current Excel File: {ExcelFile}");
+            BuildHeader();
             EndLog();
         }
         private void SetConfig()
@@ -52,8 +54,6 @@ namespace UCCX_API
             //Required for dotnet run --project <PATH> command to be used to execute the process via batch file
             string workingDirectory = Environment.CurrentDirectory;
             //Console.WriteLine("\n\nWORKING DIRECTORY: " + workingDirectory);
-            string projectDirectory = Directory.GetParent(workingDirectory).Parent.FullName;
-            //Console.WriteLine(projectDirectory);
             string jsonPath = workingDirectory + "\\appsettings.json";
 
 
@@ -137,7 +137,7 @@ namespace UCCX_API
         private void SetCredentials()
         {
             Username = Configuration.GetSection("UCCXCredentials")["Username"];
-            Password = Configuration.GetSection("UCCXCredentials")["Password"];
+            Password = Base64Decode(Configuration.GetSection("UCCXCredentials")["Password"]);
         }
         private void SetLogPath()
         {
@@ -191,5 +191,30 @@ namespace UCCX_API
         {
             Console.WriteLine("ENV: {0}\nROOT URL: {1}\nEXCEL FILE: {2}\nUSERNAME: {3}\nPASSWORD: {4}", Env, RootURL, ExcelFile, Username, Password.Substring(0, 10));
         }
+        public static string Base64Decode(string base64EncodedData)
+        {
+            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
+            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+        }
+        private void BuildHeader()
+        {
+            string initLine = "######## Logging Initiated -- " + System.DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss") + " ########";
+            int len = initLine.Length;
+            string borders = "";
+            for (int i = 0; i < len; ++i)
+            {
+                borders += "#";
+            }
+
+            LogHeader += $"\n{initLine}";
+            LogHeader += $"\n\t:";
+            LogHeader += $"\n\t:Current Environment: {Env}";
+            LogHeader += $"\n\t:Current Root URL: {RootURL}";
+            LogHeader += $"\n\t:Using Username: {Username}";
+            LogHeader += $"\n\t:Using Password: {Password.Substring(0, Password.Length / 15)}**************************************";
+            LogHeader += $"\n\t:Current Excel File: {ExcelFile}";
+            LogHeader += $"\n{borders}";
+        }
     }
 }
+
