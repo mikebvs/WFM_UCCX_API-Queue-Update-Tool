@@ -103,7 +103,16 @@ namespace UCCX_API
                 // This override is used to remove all skills from the Agents in the Excel Sheet
                 //apiHandler.ExcelQueueUpdate(excelData, true);
 
-                emailServices.BuildEmail(false, apiHandler.reportingMessage, apiHandler.cm.LogPath, apiHandler.cm.LogHeader);
+                // Reports email to users in Workforce Management with a report detailing the App's actions
+                //emailServices.BuildEmail(false, apiHandler.reportingMessage, apiHandler.cm.LogPath, apiHandler.cm.LogHeader);
+
+                // Print Info that will be uploaded to Reporting Sandbox Database
+                //int count = 1;
+                //foreach(System.Data.DataRow dr in apiHandler.AgentsUpdatedDT.Rows)
+                //{
+                //    var dataArray = dr.ItemArray;
+                //    Console.WriteLine($"[{count++}] {dataArray[0]} -- {dataArray[1]}");
+                //}
 
                 // Clearly defines console output end
                 Console.WriteLine("\n");
