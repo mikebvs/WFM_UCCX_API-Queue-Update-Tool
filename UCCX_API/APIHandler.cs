@@ -15,7 +15,6 @@ namespace UCCX_API
         public APIData apiData { get; set; }
         public CredentialManager cm { get; set; }
         public string reportingMessage { get; set; }
-        public DataTable AgentsUpdatedDT { get; set; }
         public void Init()
         {
             //Creates Console Banner
@@ -23,10 +22,6 @@ namespace UCCX_API
             Console.WriteLine("#################### WORKFORCE MANAGEMENT QUEUE UPDATE UCCX API TOOL ###################");
             Console.WriteLine("########################################################################################\n\n");
             UpdateConsoleStep("Entering Init State...");
-            // Creates a DataTable to compile agent information to push to Metrics Reporting Sandbox
-            AgentsUpdatedDT = new DataTable();
-            AgentsUpdatedDT.Columns.Add("Agent", typeof(string));
-            AgentsUpdatedDT.Columns.Add("Queue", typeof(string));
             // Credential Manager stores Config Parameters, includes API Auth Credentials, API Root URL depending on Environment, and Logging paths
             this.cm = new CredentialManager();
             try
@@ -174,7 +169,6 @@ namespace UCCX_API
                         LogConsoleAndLogFile($"\t>Failed to Update: {numFailed.ToString()}.", 2, false, false);
                         cm.LogMessage($"Time Elapsed: N/A ms, Total Time Elapsed: {totalTime.ToString()}ms");
                     }
-                    AgentsUpdatedDT.Rows.Add(excelAgent.agentName, excelAgent.Queue);
                 }
                 catch (Exception e)
                 {

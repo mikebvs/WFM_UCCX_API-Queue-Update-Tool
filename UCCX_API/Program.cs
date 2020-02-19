@@ -104,7 +104,7 @@ namespace UCCX_API
                 //apiHandler.ExcelQueueUpdate(excelData, true);
 
                 // Reports email to users in Workforce Management with a report detailing the App's actions
-                //emailServices.BuildEmail(false, apiHandler.reportingMessage, apiHandler.cm.LogPath, apiHandler.cm.LogHeader);
+                emailServices.BuildEmail(false, apiHandler.reportingMessage, apiHandler.cm.LogPath, apiHandler.cm.LogHeader);
 
                 // Print Info that will be uploaded to Reporting Sandbox Database
                 //int count = 1;
