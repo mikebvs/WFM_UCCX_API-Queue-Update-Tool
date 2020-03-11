@@ -20,7 +20,7 @@ namespace UCCX_API
         public string EmailBody { get; set; }
         public string EmailSubject { get; set; }
 
-        public void BuildEmail(bool error, string message, string logPath, string runSummary)
+        public void BuildEmail(bool fatalError, string message, string logPath, string runSummary, bool updateErrors)
         {
             Console.WriteLine("\n\n");
             //Required for dotnet run --project <PATH> command to be used to execute the process via batch file
@@ -55,10 +55,15 @@ namespace UCCX_API
                 EmailTo = configuration.GetSection("EmailConfiguration")["EmailCC"];
             }
             EmailFrom = configuration.GetSection("EmailConfiguration")["EmailFrom"];
-            if(error == true)
+            if(fatalError == true)
             {
-                EmailBody = configuration.GetSection("EmailConfiguration")["ErrorEmailBody"];
-                EmailSubject = configuration.GetSection("EmailConfiguration")["ErrorEmailSubject"].Replace("<DATE>", System.DateTime.Now.ToString("MM/dd/yyyy"));
+                EmailBody = configuration.GetSection("EmailConfiguration")["FatalErrorEmailBody"];
+                EmailSubject = configuration.GetSection("EmailConfiguration")["FatalErrorEmailSubject"].Replace("<DATE>", System.DateTime.Now.ToString("MM/dd/yyyy"));
+            }
+            else if(updateErrors == true)
+            {
+                EmailBody = configuration.GetSection("EmailConfiguration")["EmailBody"].Replace("<REPORTING_SUMMARY>", runSummary).Replace("<REPORTING_RESULTS>", message).Replace("<FULL_LOG_PATH>", logPath);
+                EmailSubject = configuration.GetSection("EmailConfiguration")["UpdateErrorEmailSubject"].Replace("<DATE>", System.DateTime.Now.ToString("MM/dd/yyyy"));
             }
             else
             {
@@ -75,6 +80,7 @@ namespace UCCX_API
         }
         public void SendEmail()
         {
+            
             var message = new MimeMessage();
             
             // Add Email From

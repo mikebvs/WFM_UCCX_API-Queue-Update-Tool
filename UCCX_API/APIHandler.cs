@@ -15,6 +15,7 @@ namespace UCCX_API
         public APIData apiData { get; set; }
         public CredentialManager cm { get; set; }
         public string reportingMessage { get; set; }
+        public int updatesFailed { get; set; }
         public void Init()
         {
             //Creates Console Banner
@@ -22,6 +23,7 @@ namespace UCCX_API
             Console.WriteLine("#################### WORKFORCE MANAGEMENT QUEUE UPDATE UCCX API TOOL ###################");
             Console.WriteLine("########################################################################################\n\n");
             UpdateConsoleStep("Entering Init State...");
+            updatesFailed = 0;
             // Credential Manager stores Config Parameters, includes API Auth Credentials, API Root URL depending on Environment, and Logging paths
             this.cm = new CredentialManager();
             try
@@ -62,8 +64,7 @@ namespace UCCX_API
                     }
                     catch (Exception n)
                     {
-                        cm.LogMessage($"Error occurred, trying again: {n.Message.ToString()} -- {n.StackTrace.ToString()}");
-                        isw.Start();
+                        cm.LogMessage($"Error occurred starting StopWatch object: {n.Message.ToString()} -- {n.StackTrace.ToString()}");
                     }
                     // Determine Agent URL via apiData.ResourcesData
                     string agentUserId = apiData.ResourcesData.Resource.Where(p => p.FirstName + " " + p.LastName == excelAgent.agentName).First().UserID;
@@ -137,7 +138,8 @@ namespace UCCX_API
                             numFailed += 1;
                             // Log Error and update Console
                             LogConsoleAndLogFile($"ERROR: {e.Message.ToString()}", 5);
-                            cm.LogMessage(e.StackTrace.ToString());
+                            cm.LogMessage($"Source: {e.Source.ToString()}");
+                            cm.LogMessage($"Stack Trace: {e.StackTrace.ToString()}");
                             if (e.Message.ToString().Contains("SSL"))
                             {
                                 throw new System.Exception("SSL Error", e);
@@ -150,16 +152,18 @@ namespace UCCX_API
                         numFailed += 1;
                     }
                     numAgentsProcessed += 1;
-
-                    if (isw.IsRunning)
+                    if(isw != null)
                     {
-                    isw.Stop();
-                    totalTime += isw.ElapsedMilliseconds;
-                    // End Process Console Output
-                        UpdateConsoleStep($"\t>Agents Processed: {numAgentsProcessed.ToString()}/{excelData.excelAgents.Count.ToString()} ({isw.ElapsedMilliseconds.ToString()}ms, {totalTime.ToString()}ms Total)");
-                        LogConsoleAndLogFile($"\t>Successfully updated: {(numAgentsProcessed - numFailed).ToString()}.", 1, false, false);
-                        LogConsoleAndLogFile($"\t>Failed to Update: {numFailed.ToString()}.", 2, false, false);
-                        cm.LogMessage($"Time Elapsed: {isw.ElapsedMilliseconds.ToString()}ms, Total Time Elapsed: {totalTime.ToString()}ms");
+                        if (isw.IsRunning)
+                        {
+                        isw.Stop();
+                        totalTime += isw.ElapsedMilliseconds;
+                        // End Process Console Output
+                            UpdateConsoleStep($"\t>Agents Processed: {numAgentsProcessed.ToString()}/{excelData.excelAgents.Count.ToString()} ({isw.ElapsedMilliseconds.ToString()}ms, {totalTime.ToString()}ms Total)");
+                            LogConsoleAndLogFile($"\t>Successfully updated: {(numAgentsProcessed - numFailed).ToString()}.", 1, false, false);
+                            LogConsoleAndLogFile($"\t>Failed to Update: {numFailed.ToString()}.", 2, false, false);
+                            cm.LogMessage($"Time Elapsed: {isw.ElapsedMilliseconds.ToString()}ms, Total Time Elapsed: {totalTime.ToString()}ms");
+                        }
                     }
                     else
                     {
@@ -173,7 +177,8 @@ namespace UCCX_API
                 catch (Exception e)
                 {
                     cm.LogMessage($"Error Occurred Updating Agent: {excelAgent.agentName} -- {e.Message.ToString()}");
-                    cm.LogMessage(e.StackTrace.ToString());
+                    cm.LogMessage($"Source: {e.Source.ToString()}");
+                    cm.LogMessage($"Stack Trace: {e.StackTrace.ToString()}");
                     if (e.Message.ToString().Contains("SSL"))
                     {
                         throw new System.Exception("SSL Error", e);
@@ -181,6 +186,7 @@ namespace UCCX_API
                 }
                 cm.LogMessage("");
             }
+            updatesFailed = numFailed;
             cm.LogMessage("");
             cm.LogMessage("");
             cm.LogMessage("----------------------------------- END OF PROCESS REPORT ------------------------------------");

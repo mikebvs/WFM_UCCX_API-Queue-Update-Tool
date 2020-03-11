@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Linq;
 using OfficeOpenXml;
 using System.Text;
@@ -82,6 +83,7 @@ namespace UCCX_API
         public List<ExcelAgent> ReadAgentData(int sheetIndex)
         {
 
+            Regex nameRegex = new Regex("[^a-zA-Z0-9 -]");
             FileInfo file = new FileInfo(filePath);
 
             List<ExcelAgent> agentData = new List<ExcelAgent>();
@@ -100,7 +102,11 @@ namespace UCCX_API
                     {
                         if (j == 1 && worksheet.Cells[i, j].Value != null)
                         {
-                            sheetName = worksheet.Cells[i, j].Value.ToString();
+                            // New version of Sheet Name Retrieval, now replaces all non-alphanumeric characters with nothing in the name.
+                            // Implemented due to entries such as "<First_Name> <Last_Name>*" Asterisk would cause the process not to find the agent record via API
+                            sheetName = nameRegex.Replace(worksheet.Cells[i, j].Value.ToString(), "");
+                            // Old version of Sheet Name Retrieval, very basic.
+                            //sheetName = worksheet.Cells[i, j].Value.ToString();
                         }
                         else if (j == 2 & worksheet.Cells[i, j] != null && worksheet.Cells[i, j].Value != null)
                         {

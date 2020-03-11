@@ -48,7 +48,7 @@ namespace UCCX_API
                     apiHandler.cm.LogMessage($"Error occurred during ExcelData Init Sequence: {e.Message.ToString()}");
                     apiHandler.cm.LogMessage($"{e.StackTrace.ToString()}");
                     apiHandler.cm.EndLog();
-                    Thread.Sleep(30000);
+                    Thread.Sleep(15000);
                     excelData.Init(apiHandler.cm);
                 }
                 //excelData.Info();
@@ -81,7 +81,7 @@ namespace UCCX_API
                     apiHandler.cm.LogMessage($"Error occurred during ExcelQueueUpdate Sequence: {e.Message.ToString()}");
                     apiHandler.cm.LogMessage($"{e.StackTrace.ToString()}");
                     apiHandler.cm.EndLog();
-                    Thread.Sleep(30000);
+                    Thread.Sleep(120000);
                     try
                     {
                         apiHandler.ExcelQueueUpdate(excelData);
@@ -98,13 +98,22 @@ namespace UCCX_API
                         apiHandler.cm.LogMessage(y.StackTrace.ToString());
                         apiHandler.cm.EndLog();
                     }
-
+                
                 }
+                
+                
                 // This override is used to remove all skills from the Agents in the Excel Sheet
                 //apiHandler.ExcelQueueUpdate(excelData, true);
 
                 // Reports email to users in Workforce Management with a report detailing the App's actions
-                emailServices.BuildEmail(false, apiHandler.reportingMessage, apiHandler.cm.LogPath, apiHandler.cm.LogHeader);
+                if(apiHandler.updatesFailed > 0)
+                {
+                    emailServices.BuildEmail(true, apiHandler.reportingMessage, apiHandler.cm.LogPath, apiHandler.cm.LogHeader, true);
+                }
+                else
+                {
+                    emailServices.BuildEmail(false, apiHandler.reportingMessage, apiHandler.cm.LogPath, apiHandler.cm.LogHeader, false);
+                }
 
                 // Print Info that will be uploaded to Reporting Sandbox Database
                 //int count = 1;
@@ -127,7 +136,7 @@ namespace UCCX_API
             {
                 try
                 {
-                    emailServices.BuildEmail(true, String.Empty, String.Empty, String.Empty);
+                    emailServices.BuildEmail(true, String.Empty, String.Empty, String.Empty, false);
                     APIHandler apiHandlerLog = new APIHandler();
                     apiHandlerLog.Init();
                     apiHandlerLog.cm.LogMessage($"FATAL ERROR: {f.Message.ToString()}");
