@@ -16,6 +16,7 @@ namespace UCCX_API
         public CredentialManager cm { get; set; }
         public string reportingMessage { get; set; }
         public int updatesFailed { get; set; }
+        public List<string> failedLogging { get; set; }
         public void Init()
         {
             //Creates Console Banner
@@ -40,6 +41,7 @@ namespace UCCX_API
         // Method used to update agent queues based on the results of the Excel File built by WFM
         public void ExcelQueueUpdate(ExcelData excelData, bool wipeData = false)
         {
+            failedLogging = new List<string>();
             long totalTime = 0;
             UpdateConsoleStep("WFM Agent Queue Update Process using the UCCX API...");
             // Variables to track for logging/reporting
@@ -176,12 +178,18 @@ namespace UCCX_API
                 }
                 catch (Exception e)
                 {
+                    numAgentsProcessed += 1;
+                    numFailed += 1;
                     cm.LogMessage($"Error Occurred Updating Agent: {excelAgent.agentName} -- {e.Message.ToString()}");
                     cm.LogMessage($"Source: {e.Source.ToString()}");
                     cm.LogMessage($"Stack Trace: {e.StackTrace.ToString()}");
                     if (e.Message.ToString().Contains("SSL"))
                     {
                         throw new System.Exception("SSL Error", e);
+                    }
+                    else
+                    {
+                        failedLogging.Add($"{excelAgent.agentName} - {excelAgent.Queue}");
                     }
                 }
                 cm.LogMessage("");
@@ -407,6 +415,7 @@ namespace UCCX_API
         {
             // Console Reporting Formatting
             UpdateConsoleStep("");
+            Console.WriteLine("\n\n\n\n\n\n\n FAILED: " + numFailed + "\n\n\n\n");
             Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
             Console.Write(new string(' ', Console.WindowWidth));
             Console.SetCursorPosition(0, Console.CursorTop);
@@ -418,12 +427,14 @@ namespace UCCX_API
             cm.LogMessage($"Finished WFM Agent Queue Update Process using the UCCX API.");
             if (numFailed > 0)
             {
+                Console.WriteLine("YES");
                 cm.LogMessage($">Attempted to update {totalAgents.ToString()} Agents ({timeElapsed.ToString()}ms).");
                 cm.LogMessage($">WARNING: {numFailed.ToString()}/{totalAgents.ToString()} Agents failed to update.");
                 cm.LogMessage($">{(totalAgents - numFailed).ToString()}/{totalAgents.ToString()} Agents successfully updated.");
             }
             else
             {
+                Console.WriteLine("NO");
                 cm.LogMessage($">{totalAgents.ToString()} Agents successfully updated ({timeElapsed.ToString()}ms).");
             }
         }

@@ -139,10 +139,10 @@ namespace UCCX_API
                     {
                         UpdateConsoleStep("Attempting to Connect to SMTP Server...");
                         client.Disconnect(true);
-                        client.Timeout = 15000;
+                        client.Timeout = 60000;
                         client.ServerCertificateValidationCallback = (s, c, h, e) => true;
                         client.CheckCertificateRevocation = false;
-                        
+
                         //client.SslProtocols = System.Security.Authentication.SslProtocols.Tls;
                         client.Connect(EmailConfig.SmtpServer, EmailConfig.SmtpPort, MailKit.Security.SecureSocketOptions.Auto);
                         done = true;
@@ -166,7 +166,7 @@ namespace UCCX_API
                 }
 
                 UpdateConsoleStep("Authenticating User to SMTP Server...");
-                client.Authenticate("UiAutoBot@elephant.com", EmailConfig.SmtpPassword);
+                client.Authenticate(EmailConfig.SmtpUsername, EmailConfig.SmtpPassword);
 
                 UpdateConsoleStep("Sending Email...");
                 client.Send(message);

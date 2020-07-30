@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace UCCX_API
 {
@@ -28,7 +29,15 @@ namespace UCCX_API
                 string valConvert = str.Substring(firstParenth, difference);
                 string key = str.Substring(0, firstParenth - 1);
                 int val = Convert.ToInt32(valConvert);
-                addDictionary.Add(key, val);
+                if (addDictionary.ContainsKey(key))
+                {
+                    Console.WriteLine($"Key already present: {key}, updating the skill value in the Dictionary from {addDictionary.FirstOrDefault(x => x.Key == key).Value.ToString()} to {val.ToString()}.");
+                    addDictionary[key] = val;
+                }
+                else
+                {
+                    addDictionary.Add(key, val);
+                }
             }
             // Initialize Add
             SkillsAdded = addDictionary;

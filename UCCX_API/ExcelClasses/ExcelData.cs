@@ -17,6 +17,7 @@ namespace UCCX_API
         public Reader reader { get; set; }
         public List<ExcelAgent> excelAgents { get; set; }
         public List<ExcelSkill> excelSkills { get; set; }
+        public List<string> queuesFailed { get; set; }
         public new void Info()
         {
             Console.WriteLine("\n\n###################################################################");

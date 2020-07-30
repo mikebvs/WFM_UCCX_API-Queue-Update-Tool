@@ -62,19 +62,26 @@ namespace UCCX_API
                             continue;
                         }
                     }
-                    if (add != String.Empty && add != null && add != "" && add.Length > 2)
+                    try
                     {
-                        //Console.WriteLine("Adding " + name);
-                        ExcelSkill skill = new ExcelSkill(name, add, remove);
-                        skillData.Add(skill);
-                        if(skillResource != String.Empty && skillResource != null)
+                        if (add != String.Empty && add != null && add != "" && add.Length > 2)
                         {
-                            skill.SkillResourceGroup = skillResource;
+                            //Console.WriteLine("Adding " + name);
+                            ExcelSkill skill = new ExcelSkill(name, add, remove);
+                            skillData.Add(skill);
+                            if(skillResource != String.Empty && skillResource != null)
+                            {
+                                skill.SkillResourceGroup = skillResource;
+                            }
+                            if(skillTeam != String.Empty && skillTeam != null)
+                            {
+                                skill.SkillTeam = skillTeam;
+                            }
                         }
-                        if(skillTeam != String.Empty && skillTeam != null)
-                        {
-                            skill.SkillTeam = skillTeam;
-                        }
+                    }
+                    catch (Exception e)
+                    {
+
                     }
                 }
             }
